@@ -1,29 +1,33 @@
 package com.krino;
 
-import com.sun.jdi.Value;
-
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
 
 public class Main {
-    static int symbol_count = 100;
+    static int symbol_count = 120;
     static CyclicBarrier cyclicBarrier;
     static CountDownLatch cdl;
     static String os = System.getProperty("os.name");
     static final int thread_count = 10;
-    static final Duration duration = Duration.ofSeconds(5);
+    static final Duration duration = Duration.ofSeconds(2);
 
+    public static class Tuple<X, Y> {
+        public final X x;
+        public final Y y;
+        public Tuple(X x, Y y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
 
+    static HashMap<String,  Tuple<Integer, Long>> progressReport = new HashMap<>();
 
-    static HashMap<String, Integer> progressReport = new HashMap<>();
-
-    public synchronized static void ProgressWriter(String name, int currentCount){
-        progressReport.put(name, currentCount);
+    public synchronized static void ProgressWriter(String name, int currentCount, long startingTime){
+        progressReport.put(name, new Tuple<Integer, Long>(currentCount, startingTime));
         try {
             if (os.contains("Windows")) {
-                System.out.print("\033[H");
-                System.out.flush();
+                System.out.print("\033["+(thread_count + 3)+"A");
             }
             else
                 new ProcessBuilder("clear").inheritIO().start().waitFor();
@@ -31,11 +35,18 @@ public class Main {
             throw new RuntimeException(e);
         }
         System.out.println("\n=========");
-        ArrayList<Map.Entry<String, Integer>> entries = new ArrayList<>(progressReport.entrySet());
-        entries.sort(Map.Entry.comparingByKey());
-        for (Map.Entry<String, Integer> entry : entries) {
-            System.out.println(entry.getKey() + " ".repeat(16 - entry.getKey().length()) + "[" + "#".repeat(entry.getValue()) + " ".repeat(symbol_count - entry.getValue() - 1) + "]");
+        ArrayList<Map.Entry<String, Tuple<Integer, Long>>> entries = new ArrayList<>(progressReport.entrySet());
+        entries.sort(Comparator.comparingInt(entry -> Integer.parseInt(entry.getKey().replaceAll("\\D+", ""))));
+        for (Map.Entry<String, Tuple<Integer, Long>> entry : entries) {
+            Duration duration = Duration.ofNanos(System.nanoTime() - entry.getValue().y);
+            System.out.println(entry.getKey() +
+                    " ".repeat(16 - entry.getKey().length()) +
+                    "[" + "#".repeat(entry.getValue().x) +
+                    " ".repeat(symbol_count - entry.getValue().x - 1) + "]" + (((entry.getValue().x + 1) >= symbol_count) ? "" :
+                    " " + duration.toSeconds() +"."+ duration.toMillis() + "s")
+                    );
         }
+        System.out.print("\033["+(thread_count + 3)+"B");
     }
 
     static class MyThread implements Runnable {
@@ -51,13 +62,14 @@ public class Main {
 
         public void run()
         {
+            long startTime = System.nanoTime();
             for(int currentSymbols = 0; currentSymbols < symbol_count; currentSymbols++) {
                 try {
-                    Thread.sleep(millisPerSymbol + (((new Random()).nextBoolean()) ? -1L : 1L) * (new Random()).nextLong(50));
+                    Thread.sleep(millisPerSymbol + (((new Random()).nextBoolean()) ? -1L : 1L) * (new Random()).nextLong(millisPerSymbol / 2));
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-                ProgressWriter(name, currentSymbols);
+                ProgressWriter(name, currentSymbols, startTime);
             }
             try {
                 cyclicBarrier.await();
@@ -69,8 +81,7 @@ public class Main {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        System.out.print("\033[H\033[2J");
-        System.out.println("Starting execution!");
+        System.out.println("Starting execution!" + "\n".repeat(thread_count + 2));
         Thread.sleep(1000);
         ExecutorService executorService;
         cyclicBarrier = new CyclicBarrier(thread_count, null);
