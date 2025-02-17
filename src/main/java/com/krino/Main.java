@@ -4,15 +4,16 @@ import com.sun.jdi.Value;
 
 import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 public class Main {
-    static int symbol_count = 20;
+    static int symbol_count = 100;
     static CyclicBarrier cyclicBarrier;
+    static CountDownLatch cdl;
     static String os = System.getProperty("os.name");
+    static final int thread_count = 10;
+    static final Duration duration = Duration.ofSeconds(5);
+
 
 
     static HashMap<String, Integer> progressReport = new HashMap<>();
@@ -33,7 +34,7 @@ public class Main {
         ArrayList<Map.Entry<String, Integer>> entries = new ArrayList<>(progressReport.entrySet());
         entries.sort(Map.Entry.comparingByKey());
         for (Map.Entry<String, Integer> entry : entries) {
-            System.out.println(entry.getKey() + " [" + "#".repeat(entry.getValue()) + " ".repeat(symbol_count - entry.getValue() - 1) + "]");
+            System.out.println(entry.getKey() + " ".repeat(16 - entry.getKey().length()) + "[" + "#".repeat(entry.getValue()) + " ".repeat(symbol_count - entry.getValue() - 1) + "]");
         }
     }
 
@@ -52,7 +53,7 @@ public class Main {
         {
             for(int currentSymbols = 0; currentSymbols < symbol_count; currentSymbols++) {
                 try {
-                    Thread.sleep(millisPerSymbol + (new Random()).nextLong(100));
+                    Thread.sleep(millisPerSymbol + (((new Random()).nextBoolean()) ? -1L : 1L) * (new Random()).nextLong(50));
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -60,6 +61,7 @@ public class Main {
             }
             try {
                 cyclicBarrier.await();
+                cdl.countDown();
             } catch (InterruptedException | BrokenBarrierException e) {
                 throw new RuntimeException(e);
             }
@@ -67,20 +69,17 @@ public class Main {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        int thread_count = 5;
-        Duration duration = Duration.ofSeconds(5);
         System.out.print("\033[H\033[2J");
         System.out.println("Starting execution!");
         Thread.sleep(1000);
         ExecutorService executorService;
         cyclicBarrier = new CyclicBarrier(thread_count, null);
+        cdl = new CountDownLatch(1);
         executorService = Executors.newFixedThreadPool(thread_count);
-        executorService.execute(new MyThread("Thread1", duration));
-        executorService.execute(new MyThread("Thread2", duration));
-        executorService.execute(new MyThread("Thread3", duration));
-        executorService.execute(new MyThread("Thread4", duration));
-        executorService.execute(new MyThread("Thread5", duration));
-
+        for (int i = 1; i <= thread_count; i++) {
+            executorService.execute(new MyThread("Thread" + i, duration));
+        }
+        cdl.await();
         executorService.shutdown();
         System.out.println("Done");
     }
