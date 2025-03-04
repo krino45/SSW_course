@@ -1,12 +1,12 @@
 package com.krino.homework_4.core.service;
 
-import com.krino.homework_4.core.model.enums.Pet;
-import org.springframework.http.ResponseEntity;
+import com.krino.homework_4.core.model.Pet;
+import com.krino.homework_4.core.model.exception.UnauthorizedException;
 
 public interface PetService {
-    public ResponseEntity<?> updatePetFull(Pet pet);
-    public ResponseEntity<?> createPet(Pet pet);
-    public ResponseEntity<?> getPet(int petId);
-    public ResponseEntity<?> updatePetFull(int petId, String newName, String newStatus);
-    public ResponseEntity<?> deletePet(int petId, String api);
+    Pet updatePetFull(Pet pet);
+    Pet createPet(Pet pet);
+    Pet getPet(int petId);
+    boolean updatePet(int petId, String newName, String newStatus);
+    boolean deletePet(int petId, String api) throws UnauthorizedException;
 }

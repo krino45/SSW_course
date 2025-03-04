@@ -1,6 +1,6 @@
 package com.krino.homework_4.core.repository;
 
-import com.krino.homework_4.core.model.enums.Pet;
+import com.krino.homework_4.core.model.Pet;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -16,9 +16,10 @@ public class PetRepository {
         return pets.stream().filter(pet -> pet.getId() == petId).findFirst();
     }
 
-    public void save(Pet pet) {
+    public Pet save(Pet pet) {
         pets.removeIf(existingPet -> Objects.equals(existingPet.getId(), pet.getId()));
         pets.add(pet);
+        return pet;
     }
 
     public boolean delete(int petId) {
