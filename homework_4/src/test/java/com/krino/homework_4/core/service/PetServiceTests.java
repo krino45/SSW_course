@@ -3,7 +3,9 @@ package com.krino.homework_4.core.service;
 import com.krino.homework_4.core.model.Pet;
 import com.krino.homework_4.core.model.enums.Status;
 import com.krino.homework_4.core.model.exception.UnauthorizedException;
+import com.krino.homework_4.core.repository.CategoryRepository;
 import com.krino.homework_4.core.repository.PetRepository;
+import com.krino.homework_4.core.repository.TagRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,13 +24,23 @@ public class PetServiceTests {
     @Mock
     private PetRepository petRepository;
 
+    @Mock
+    private CategoryRepository categoryRepository;
+
+    @Mock
+    private TagRepository tagRepository;
+
     @InjectMocks
-    private PetService petService = new PetServiceImpl();
+    private PetServiceImpl petServiceImpl;
+
+    private PetService petService;
+
 
     private Pet testPet;
 
     @BeforeEach
     public void setUp() {
+        petService = petServiceImpl;
         testPet = new Pet();
         testPet.setId(1);
         testPet.setName("TestPet");
@@ -37,7 +49,7 @@ public class PetServiceTests {
 
     @Test
     public void testUpdatePetFull_Success() {
-        when(petRepository.findById(testPet.getId())).thenReturn(Optional.of(testPet));
+        when(petRepository.existsById(testPet.getId())).thenReturn(true);
         when(petRepository.save(testPet)).thenReturn(testPet);
 
         Pet updatedPet = petService.updatePetFull(testPet);
@@ -86,7 +98,7 @@ public class PetServiceTests {
 
     @Test
     public void testUpdatePetFull_PetNotFound() {
-        when(petRepository.findById(testPet.getId())).thenReturn(Optional.empty());
+        when(petRepository.existsById(testPet.getId())).thenReturn(false);
 
         Pet updatedPet = petService.updatePetFull(testPet);
 
@@ -149,12 +161,13 @@ public class PetServiceTests {
 
     @Test
     public void testDeletePet_Authorized() throws UnauthorizedException {
-        when(petRepository.delete(1)).thenReturn(true);
+        doNothing().when(petRepository).deleteById(1);
+        when(petRepository.existsById(1)).thenReturn(true);
 
         boolean deleted = petService.deletePet(1, "api_key");
 
         assertTrue(deleted);
-        verify(petRepository).delete(1);
+        verify(petRepository).deleteById(1);
     }
 
     @Test

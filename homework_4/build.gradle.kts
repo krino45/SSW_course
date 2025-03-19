@@ -20,10 +20,20 @@ repositories {
 dependencies {
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor ("org.projectlombok:lombok")
+
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+
+
+	runtimeOnly("org.postgresql:postgresql")
+	implementation("org.liquibase:liquibase-core")
+
+
 	testImplementation("org.mockito:mockito-inline:5.2.0")
+	testImplementation("org.testcontainers:postgresql")
+	testImplementation("org.testcontainers:junit-jupiter")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
