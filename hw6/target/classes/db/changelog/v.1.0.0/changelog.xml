@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+
+    <changeSet id="01" author="krino45">
+        <createTable tableName="messages">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="text" type="varchar(2000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rating" type="int" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="parent_id" type="uuid">
+                <constraints nullable="true"/>
+            </column>
+            <column name="reply_count" type="int" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="message_ratings">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="message_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="messages"
+                                 baseColumnNames="parent_id"
+                                 constraintName="fk_message_parent"
+                                 referencedTableName="messages"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="message_ratings"
+                                 baseColumnNames="message_id"
+                                 constraintName="fk_rating_message"
+                                 referencedTableName="messages"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+
+        <addUniqueConstraint tableName="message_ratings"
+                             columnNames="message_id, user_id"
+                             constraintName="uq_user_message_rating"/>
+    </changeSet>
+</databaseChangeLog>
