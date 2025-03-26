@@ -1,81 +1,102 @@
 package io.swagger.api;
 
-import io.swagger.model.Message;
-import io.swagger.model.MessageCreate;
-import io.swagger.model.MessageUpdate;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import io.swagger.model.*;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 public class MessageServiceImplITests {
 
+    private static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15.2")
+            .withDatabaseName("messagedb")
+            .withUsername("test")
+            .withPassword("test");
+
     @Autowired
     private MessageService messageService;
 
-    // Assume MessageRepository is available to help with cleanup/verification.
     @Autowired
     private MessageRepository messageRepository;
+
+    private final UUID testUserId1 = UUID.fromString("11111111-1111-1111-1111-111111111111");
+    private final UUID testUserId2 = UUID.fromString("22222222-2222-2222-2222-222222222222");
+    private Message testParentMessage;
+
+    @BeforeAll
+    public static void startContainer() {
+        postgres.start();
+        System.setProperty("spring.datasource.url", postgres.getJdbcUrl());
+        System.setProperty("spring.datasource.username", postgres.getUsername());
+        System.setProperty("spring.datasource.password", postgres.getPassword());
+    }
+
+    @AfterAll
+    public static void stopContainer() {
+        postgres.stop();
+    }
 
     @BeforeEach
     public void setUp() {
         messageRepository.deleteAll();
+
+        MessageCreate parentCreate = new MessageCreate();
+        parentCreate.setText("Test parent message");
+        testParentMessage = messageService.createMessage(parentCreate, testUserId1);
     }
 
     @Test
     public void testCreateMessage() {
         MessageCreate messageCreate = new MessageCreate();
         messageCreate.setText("Hello world");
-        UUID userId = UUID.randomUUID();
 
-        Message message = messageService.createMessage(messageCreate, userId);
+        Message message = messageService.createMessage(messageCreate, testUserId1);
+
         assertNotNull(message.getId());
-        Assertions.assertEquals("Hello world", message.getText());
-        Assertions.assertEquals(userId, message.getUserId());
+        assertEquals("Hello world", message.getText());
+        assertEquals(testUserId1, message.getUserId());
+
+        // Verify it was actually persisted
+        Optional<Message> foundMessage = messageRepository.findById(message.getId());
+        assertTrue(foundMessage.isPresent());
     }
 
     @Test
     public void testCreateReply() {
-        MessageCreate parentCreate = new MessageCreate();
-        parentCreate.setText("Parent message");
-        UUID userId = UUID.randomUUID();
-        Message parent = messageService.createMessage(parentCreate, userId);
-
         MessageCreate replyCreate = new MessageCreate();
         replyCreate.setText("Reply message");
-        Message reply = messageService.createReply(parent.getId(), replyCreate, userId);
-        assertNotNull(reply.getId());
-        Assertions.assertEquals("Reply message", reply.getText());
-        Assertions.assertEquals(parent.getId(), reply.getParentId());
 
-        Optional<Message> updatedParentOpt = messageService.getMessageById(parent.getId());
-        assertTrue(updatedParentOpt.isPresent());
-        Message updatedParent = updatedParentOpt.get();
-        Assertions.assertEquals(Optional.of(1), Optional.ofNullable(updatedParent.getReplyCount()));
+        Message reply = messageService.createReply(testParentMessage.getId(), replyCreate, testUserId2);
+
+        assertNotNull(reply.getId());
+        assertEquals("Reply message", reply.getText());
+        assertEquals(testParentMessage.getId(), reply.getParentId());
+
+        // Verify parent's reply count was updated
+        Optional<Message> updatedParent = messageRepository.findById(testParentMessage.getId());
+        assertTrue(updatedParent.isPresent());
+        assertEquals(Integer.valueOf(1), updatedParent.get().getReplyCount());
     }
 
     @Test
     public void testDeleteMessage() {
         MessageCreate messageCreate = new MessageCreate();
         messageCreate.setText("Message to be deleted");
-        UUID userId = UUID.randomUUID();
+        Message message = messageService.createMessage(messageCreate, testUserId1);
 
-        Message message = messageService.createMessage(messageCreate, userId);
-        UUID messageId = message.getId();
+        messageService.deleteMessage(message.getId());
 
-        messageService.deleteMessage(messageId);
-        Optional<Message> deleted = messageService.getMessageById(messageId);
-        assertFalse(deleted.isPresent());
+        assertFalse(messageRepository.existsById(message.getId()));
     }
 
     @Test
@@ -95,50 +116,46 @@ public class MessageServiceImplITests {
 
     @Test
     public void testGetMessagesFiltering() {
-        UUID userId1 = UUID.randomUUID();
-        UUID userId2 = UUID.randomUUID();
-
-        MessageCreate create1 = new MessageCreate();
-        create1.setText("User1 message");
-        messageService.createMessage(create1, userId1);
-
-        MessageCreate create2 = new MessageCreate();
-        create2.setText("User2 message");
-        messageService.createMessage(create2, userId2);
+        // Create additional test messages
+        messageService.createMessage(new MessageCreate().text("User1 message"), testUserId1);
+        messageService.createMessage(new MessageCreate().text("User2 message"), testUserId2);
 
         List<Message> allMessages = messageService.getMessages(null, null);
-        Assertions.assertEquals(2, allMessages.size());
+        assertEquals(3, allMessages.size()); // Includes the parent message from setUp
 
-        List<Message> user1Messages = messageService.getMessages(userId1, null);
-        Assertions.assertEquals(1, user1Messages.size());
-        Assertions.assertEquals(userId1, user1Messages.get(0).getUserId());
+        List<Message> user1Messages = messageService.getMessages(testUserId1, null);
+        assertEquals(2, user1Messages.size());
+        assertEquals(testUserId1, user1Messages.get(0).getUserId());
     }
 
     @Test
     public void testRateMessage() {
-        MessageCreate messageCreate = new MessageCreate();
-        messageCreate.setText("Message to rate");
-        UUID userId = UUID.randomUUID();
-
-        Message message = messageService.createMessage(messageCreate, userId);
+        Message message = messageService.createMessage(
+                new MessageCreate().text("Message to rate"),
+                testUserId1
+        );
         int initialRating = message.getRating();
 
         Message ratedMessage = messageService.rateMessage(message.getId(), 1);
-        Assertions.assertEquals(Optional.of(initialRating + 1), Optional.of(ratedMessage.getRating()));
+        assertEquals(Integer.valueOf(initialRating + 1), ratedMessage.getRating());
+
+        // Verify rating persists
+        Optional<Message> reloaded = messageRepository.findById(message.getId());
+        assertTrue(reloaded.isPresent());
+        assertEquals(Integer.valueOf(initialRating + 1), reloaded.get().getRating());
     }
 
     @Test
     public void testUpdateMessage() {
-        MessageCreate messageCreate = new MessageCreate();
-        messageCreate.setText("Old text");
-        UUID userId = UUID.randomUUID();
-
-        Message message = messageService.createMessage(messageCreate, userId);
-
         MessageUpdate update = new MessageUpdate();
         update.setText("Updated text");
 
-        Message updatedMessage = messageService.updateMessage(message.getId(), update);
-        Assertions.assertEquals("Updated text", updatedMessage.getText());
+        Message updatedMessage = messageService.updateMessage(testParentMessage.getId(), update);
+        assertEquals("Updated text", updatedMessage.getText());
+
+        // Verify update persists
+        Optional<Message> reloaded = messageRepository.findById(testParentMessage.getId());
+        assertTrue(reloaded.isPresent());
+        assertEquals("Updated text", reloaded.get().getText());
     }
 }
