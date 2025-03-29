@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+    <changeSet id="5" author="krino">
+        <createTable tableName="cash_payments">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false" foreignKeyName="fk_cash_payment" references="payments(id)"/>
+            </column>
+            <column name="cash_tendered" type="float">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="check_payments">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false" foreignKeyName="fk_check_payment" references="payments(id)"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bank_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="credit_payments">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false" foreignKeyName="fk_credit_payment" references="payments(id)"/>
+            </column>
+            <column name="number" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exp_date" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
