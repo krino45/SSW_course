@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.krino.homework_7.core.service.OrderSearchServiceIntegrationTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2025-03-29T13:26:01.798Z" hostname="DESKTOP-NET76TA" time="1.48">
+  <properties/>
+  <testcase name="shouldFindOrdersByOrderStatus()" classname="com.krino.homework_7.core.service.OrderSearchServiceIntegrationTest" time="1.028"/>
+  <testcase name="shouldFindOrdersByPaymentType()" classname="com.krino.homework_7.core.service.OrderSearchServiceIntegrationTest" time="0.1"/>
+  <testcase name="shouldFindOrdersByAddress()" classname="com.krino.homework_7.core.service.OrderSearchServiceIntegrationTest" time="0.078"/>
+  <testcase name="shouldFindOrdersWithMultipleCriteria()" classname="com.krino.homework_7.core.service.OrderSearchServiceIntegrationTest" time="0.072"/>
+  <testcase name="shouldFindOrdersByCustomerName()" classname="com.krino.homework_7.core.service.OrderSearchServiceIntegrationTest" time="0.067"/>
+  <testcase name="shouldFindOrdersByDateRange()" classname="com.krino.homework_7.core.service.OrderSearchServiceIntegrationTest" time="0.067"/>
+  <testcase name="shouldFindOrdersByPaymentStatus()" classname="com.krino.homework_7.core.service.OrderSearchServiceIntegrationTest" time="0.062"/>
+  <system-out><![CDATA[20:25:47.009 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.krino.homework_7.core.service.OrderSearchServiceIntegrationTest]: OrderSearchServiceIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+20:25:47.315 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.krino.homework_7.Homework7Application for test class com.krino.homework_7.core.service.OrderSearchServiceIntegrationTest
+20:25:47.580 [Test worker] INFO org.testcontainers.images.PullPolicy -- Image pull policy will be performed by: DefaultPullPolicy()
+20:25:47.588 [Test worker] INFO org.testcontainers.utility.ImageNameSubstitutor -- Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+20:25:47.620 [Test worker] INFO org.testcontainers.DockerClientFactory -- Testcontainers version: 1.20.6
+20:25:48.204 [Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy -- Loaded org.testcontainers.dockerclient.NpipeSocketClientProviderStrategy from ~/.testcontainers.properties, will try it first
+20:25:48.771 [Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy -- Found Docker environment with local Npipe socket (npipe:////./pipe/docker_engine)
+20:25:48.773 [Test worker] INFO org.testcontainers.DockerClientFactory -- Docker host IP address is localhost
+20:25:48.795 [Test worker] INFO org.testcontainers.DockerClientFactory -- Connected to docker: 
+  Server Version: 27.4.0
+  API Version: 1.47
+  Operating System: Docker Desktop
+  Total Memory: 11921 MB
+  Labels: 
+    com.docker.desktop.address=npipe://\\.\pipe\docker_cli
+20:25:48.901 [Test worker] INFO tc.testcontainers/ryuk:0.11.0 -- Creating container for image: testcontainers/ryuk:0.11.0
+20:25:49.041 [Test worker] INFO org.testcontainers.utility.RegistryAuthLocator -- Credential helper/store (docker-credential-desktop) does not have credentials for https://index.docker.io/v1/
+20:25:49.352 [Test worker] INFO tc.testcontainers/ryuk:0.11.0 -- Container testcontainers/ryuk:0.11.0 is starting: f64f6755d2d18abd1f52ce54b2b923c838e685eeb3015be1ee41b4501ec5e71f
+20:25:50.016 [Test worker] INFO tc.testcontainers/ryuk:0.11.0 -- Container testcontainers/ryuk:0.11.0 started in PT1.1146201S
+20:25:50.021 [Test worker] INFO org.testcontainers.utility.RyukResourceReaper -- Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+20:25:50.021 [Test worker] INFO org.testcontainers.DockerClientFactory -- Checking the system...
+20:25:50.021 [Test worker] INFO org.testcontainers.DockerClientFactory -- ✔︎ Docker server version should be at least 1.6.0
+20:25:50.022 [Test worker] INFO tc.postgres:14 -- Creating container for image: postgres:14
+20:25:50.678 [Test worker] INFO tc.postgres:14 -- Container postgres:14 is starting: b61981ecea8f7447637f41cc3542af7254c4bc07e8661c1b1d059a00acd9cbcc
+20:25:55.019 [Test worker] INFO tc.postgres:14 -- Container postgres:14 started in PT4.9974164S
+20:25:55.020 [Test worker] INFO tc.postgres:14 -- Container is started (JDBC URL: jdbc:postgresql://localhost:56550/testdb?loggerLevel=OFF)
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.4)
+
+2025-03-29T20:25:55.442+07:00  INFO 9924 --- [homework_7] [    Test worker] .h.c.s.OrderSearchServiceIntegrationTest : Starting OrderSearchServiceIntegrationTest using Java 21.0.6 with PID 9924 (started by krina in C:\Users\krina\Desktop\homework_7)
+2025-03-29T20:25:55.443+07:00  INFO 9924 --- [homework_7] [    Test worker] .h.c.s.OrderSearchServiceIntegrationTest : No active profile set, falling back to 1 default profile: "default"
+2025-03-29T20:25:56.269+07:00  INFO 9924 --- [homework_7] [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-03-29T20:25:56.366+07:00  INFO 9924 --- [homework_7] [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 82 ms. Found 3 JPA repository interfaces.
+2025-03-29T20:25:56.900+07:00  INFO 9924 --- [homework_7] [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-03-29T20:25:57.267+07:00  INFO 9924 --- [homework_7] [    Test worker] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@7b122628
+2025-03-29T20:25:57.270+07:00  INFO 9924 --- [homework_7] [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-03-29T20:25:57.521+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.database                       : Set default schema name to public
+2025-03-29T20:25:58.109+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.changelog                      : Creating database history table with name: public.databasechangelog
+2025-03-29T20:25:58.160+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.changelog                      : Reading from public.databasechangelog
+2025-03-29T20:25:58.284+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.lockservice                    : Successfully acquired change log lock
+2025-03-29T20:25:58.286+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.command                        : Using deploymentId: 3254758286
+2025-03-29T20:25:58.289+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.changelog                      : Reading from public.databasechangelog
+2025-03-29T20:25:58.315+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.ui                             : Running Changeset: db/changelog/v.1.0.0/001-create-customers.xml::1::krino
+2025-03-29T20:25:58.325+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.changelog                      : Table customers created
+2025-03-29T20:25:58.327+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.changelog                      : ChangeSet db/changelog/v.1.0.0/001-create-customers.xml::1::krino ran successfully in 10ms
+2025-03-29T20:25:58.334+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.ui                             : Running Changeset: db/changelog/v.1.0.0/002-create-items.xml::2::krino
+2025-03-29T20:25:58.340+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.changelog                      : Table items created
+2025-03-29T20:25:58.341+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.changelog                      : ChangeSet db/changelog/v.1.0.0/002-create-items.xml::2::krino ran successfully in 6ms
+2025-03-29T20:25:58.346+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.ui                             : Running Changeset: db/changelog/v.1.0.0/003-create-orders.xml::3::krino
+2025-03-29T20:25:58.351+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.changelog                      : Table orders created
+2025-03-29T20:25:58.356+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.changelog                      : Table order_details created
+2025-03-29T20:25:58.357+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.changelog                      : ChangeSet db/changelog/v.1.0.0/003-create-orders.xml::3::krino ran successfully in 11ms
+2025-03-29T20:25:58.361+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.ui                             : Running Changeset: db/changelog/v.1.0.0/004-create-payments.xml::4::krino
+2025-03-29T20:25:58.367+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.changelog                      : Table payments created
+2025-03-29T20:25:58.367+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.changelog                      : ChangeSet db/changelog/v.1.0.0/004-create-payments.xml::4::krino ran successfully in 5ms
+2025-03-29T20:25:58.372+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.ui                             : Running Changeset: db/changelog/v.1.0.0/005-create-payment-methods.xml::5::krino
+2025-03-29T20:25:58.377+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.changelog                      : Table cash_payments created
+2025-03-29T20:25:58.381+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.changelog                      : Table check_payments created
+2025-03-29T20:25:58.385+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.changelog                      : Table credit_payments created
+2025-03-29T20:25:58.385+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.changelog                      : ChangeSet db/changelog/v.1.0.0/005-create-payment-methods.xml::5::krino ran successfully in 13ms
+2025-03-29T20:25:58.395+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.util                           : UPDATE SUMMARY
+2025-03-29T20:25:58.396+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.util                           : Run:                          5
+2025-03-29T20:25:58.396+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.util                           : Previously run:               0
+2025-03-29T20:25:58.396+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.util                           : Filtered out:                 0
+2025-03-29T20:25:58.396+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.util                           : -------------------------------
+2025-03-29T20:25:58.396+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.util                           : Total change sets:            5
+2025-03-29T20:25:58.397+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.util                           : Update summary generated
+2025-03-29T20:25:58.401+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.command                        : Update command completed successfully.
+2025-03-29T20:25:58.401+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.ui                             : Liquibase: Update has been successful. Rows affected: 5
+2025-03-29T20:25:58.405+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.lockservice                    : Successfully released change log lock
+2025-03-29T20:25:58.408+07:00  INFO 9924 --- [homework_7] [    Test worker] liquibase.command                        : Command execution complete
+2025-03-29T20:25:58.535+07:00  INFO 9924 --- [homework_7] [    Test worker] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-03-29T20:25:58.629+07:00  INFO 9924 --- [homework_7] [    Test worker] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.11.Final
+2025-03-29T20:25:58.683+07:00  INFO 9924 --- [homework_7] [    Test worker] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-03-29T20:25:59.140+07:00  INFO 9924 --- [homework_7] [    Test worker] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-03-29T20:25:59.229+07:00  WARN 9924 --- [homework_7] [    Test worker] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-03-29T20:25:59.250+07:00  INFO 9924 --- [homework_7] [    Test worker] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 14.17
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-03-29T20:26:00.726+07:00  INFO 9924 --- [homework_7] [    Test worker] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-03-29T20:26:00.805+07:00  INFO 9924 --- [homework_7] [    Test worker] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-03-29T20:26:01.264+07:00  WARN 9924 --- [homework_7] [    Test worker] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-03-29T20:26:01.774+07:00  INFO 9924 --- [homework_7] [    Test worker] .h.c.s.OrderSearchServiceIntegrationTest : Started OrderSearchServiceIntegrationTest in 6.703 seconds (process running for 16.515)
+]]></system-out>
+  <system-err><![CDATA[Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build what is described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.3
+WARNING: A Java agent has been loaded dynamically (C:\Users\krina\.gradle\caches\modules-2\files-2.1\net.bytebuddy\byte-buddy-agent\1.15.11\a38b16385e867f59a641330f0362ebe742788ed8\byte-buddy-agent-1.15.11.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+]]></system-err>
+</testsuite>
