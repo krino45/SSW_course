@@ -261,7 +261,7 @@ public class OrderService {
 
         payment.setAmount(paymentDto.getAmount());
         payment.setOrder(order);
-        payment.setType(payment.getType().getClass().getSimpleName().toUpperCase());
+        payment.setType(payment.getType());
 
         if (paymentDto.getStatus() != null) {
             payment.setStatus(PaymentStatus.valueOf(paymentDto.getStatus()));
@@ -283,7 +283,7 @@ public class OrderService {
 
         if (existingPayment != null) {
             // If payment type hasn't changed, just update fields
-            if (existingPayment.getType().equals(getPaymentClass(paymentDto.getPaymentType()))) {
+            if (existingPayment.getType().equalsIgnoreCase(paymentDto.getPaymentType())) {
                 updatePaymentFields(existingPayment, paymentDto);
                 paymentRepository.save(existingPayment);
                 return;
@@ -296,7 +296,7 @@ public class OrderService {
         }
 
         Payment newPayment = createPaymentFromDto(paymentDto, order);
-        newPayment.setType(newPayment.getType().getClass().getSimpleName().toUpperCase());
+        newPayment.setType(newPayment.getType());
         paymentRepository.save(newPayment);
         order.setPayment(newPayment);
     }
@@ -306,15 +306,19 @@ public class OrderService {
         payment.setAmount(paymentDto.getAmount());
         payment.setStatus(PaymentStatus.valueOf(paymentDto.getStatus()));
 
-        if (payment instanceof Cash cash) {
-            cash.setCashTendered(paymentDto.getCashTendered());
-        } else if (payment instanceof Check check) {
-            check.setName(paymentDto.getName());
-            check.setBankID(paymentDto.getBankId());
-        } else if (payment instanceof Credit credit) {
-            credit.setNumber(paymentDto.getCardNumber());
-            credit.setCardType(paymentDto.getCardType());
-            credit.setExpDate(paymentDto.getExpiryDate());
+        switch (payment) {
+            case Cash cash -> cash.setCashTendered(paymentDto.getCashTendered());
+            case Check check -> {
+                check.setName(paymentDto.getName());
+                check.setBankID(paymentDto.getBankId());
+            }
+            case Credit credit -> {
+                credit.setNumber(paymentDto.getCardNumber());
+                credit.setCardType(paymentDto.getCardType());
+                credit.setExpDate(paymentDto.getExpiryDate());
+            }
+            default -> {
+            }
         }
 
         paymentRepository.save(payment);

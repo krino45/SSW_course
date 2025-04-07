@@ -287,7 +287,7 @@ public class OrderServiceIntegrationTest {
         Credit creditPayment = (Credit) createdOrder.getPayment();
         assertEquals(300.0f, creditPayment.getAmount());
         assertEquals("4111-1111-1111-1111", creditPayment.getNumber());
-        assertEquals("MASTERCARD", creditPayment.getType());
+        assertEquals("MASTERCARD", creditPayment.getCardType());
         assertEquals(PaymentStatus.PENDING, creditPayment.getStatus());
     }
 

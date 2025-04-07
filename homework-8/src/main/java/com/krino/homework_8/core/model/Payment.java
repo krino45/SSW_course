@@ -33,12 +33,7 @@ public abstract class Payment {
     @Column(name = "payment_type")
     private String type;
 
-    public Type getType() {
-        return switch (this) {
-            case Credit ignored -> Credit.class;
-            case Check ignored -> Check.class;
-            case Cash ignored -> Cash.class;
-            default -> Payment.class;
-        };
+    public String getType() {
+        return this.getClass().getSimpleName().toUpperCase();
     }
 }
