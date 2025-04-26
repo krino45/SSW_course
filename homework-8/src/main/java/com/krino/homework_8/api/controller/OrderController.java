@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/orders")
 @Slf4j
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class OrderController {
 
@@ -29,128 +32,68 @@ public class OrderController {
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<List<OrderResponse>> getAllOrders(Authentication authentication) {
-        if (authentication == null) {
-            log.info("Authentication is null @ getAllOrders");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        User user = (User) authentication.getPrincipal();
-        if (!userService.hasAdminAccess(user)) {
-            log.info("Has no admin rights @ getAllOrders");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        List<Order> orders = orderService.getAllOrders();
-        return ResponseEntity.ok(orders.stream().map(OrderResponse::mapToDto).toList());
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<OrderResponse> getAllOrders() {
+        return orderService.getAllOrders()
+                .stream()
+                .map(OrderResponse::mapToDto)
+                .toList();
     }
 
-        @GetMapping("/customer/{customerId}")
-    public ResponseEntity<List<OrderResponse>> getOrdersByCustomer(
-            @PathVariable Long customerId,
-            Authentication authentication) {
-        if (authentication == null) {
-            log.info("Authentication is null @ getOrdersByCustomer");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        User user = (User) authentication.getPrincipal();
-
-        if (!userService.canAccessCustomer(user, customerId)) {
-            log.info("Customer {} cant access orders for {} @ getOrdersByCustomer", user.getCustomer().getId(), customerId);
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        List<Order> orders = orderService.getOrdersByCustomerId(customerId);
-        return ResponseEntity.ok(orders.stream().map(OrderResponse::mapToDto).toList());
+    @GetMapping("/customer/{customerId}")
+    @PreAuthorize("hasRole('ADMIN') or @userSecurity.canAccessCustomer(authentication, #customerId)")
+    public ResponseEntity<List<OrderResponse>> getOrdersByCustomer(@PathVariable Long customerId) {
+        List<OrderResponse> orders = orderService.getOrdersByCustomerId(customerId)
+                .stream()
+                .map(OrderResponse::mapToDto)
+                .toList();
+        return ResponseEntity.ok(orders);
     }
 
     @PostMapping
-    public ResponseEntity<OrderResponse> createOrder(
-            @RequestBody OrderRequest orderRequest,
-            Authentication authentication) {
-        if (authentication == null) {
-            log.info("Authentication is null @ createOrder");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        User user = (User) authentication.getPrincipal();
-
-        if (!userService.canAccessCustomer(user, orderRequest.getCustomerId())) {
-            log.info("Customer {} cant create orders for {} @ getOrdersByCustomer", user.getCustomer().getId(), orderRequest.getCustomerId());
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        Order order = orderService.createOrder(orderRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body(OrderResponse.mapToDto(order));
+    @PreAuthorize("hasRole('ADMIN') or @userSecurity.canAccessCustomer(authentication, #orderRequest.getCustomerId())")
+    public ResponseEntity<OrderResponse> createOrder(@RequestBody OrderRequest orderRequest) {
+        var order = orderService.createOrder(orderRequest);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(OrderResponse.mapToDto(order));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<OrderResponse> updateOrder(
             @PathVariable Long id,
-            @RequestBody OrderRequest orderRequest,
-            Authentication authentication) {
-        if (authentication == null) {
-            log.info("Authentication is null @ updateOrder");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        User user = (User) authentication.getPrincipal();
-
-        if (!userService.hasAdminAccess(user)) {
-            log.info("User is not an admin @ updateOrder");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        Order order = orderService.updateOrder(id, orderRequest);
-        return ResponseEntity.ok(OrderResponse.mapToDto(order));
+            @RequestBody OrderRequest orderRequest) {
+        var updated = orderService.updateOrder(id, orderRequest);
+        return ResponseEntity.ok(OrderResponse.mapToDto(updated));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrder(
-            @PathVariable Long id,
-            Authentication authentication) {
-        if (authentication == null) {
-            log.info("Authentication is null @ deleteOrder");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        User user = (User) authentication.getPrincipal();
-
-        if (!userService.hasAdminAccess(user)) {
-            log.info("User is not an admin @ deleteOrder");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
         orderService.deleteOrder(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<OrderResponse>> searchOrders(@RequestParam(required = false) String customerName,
-                                                            @RequestParam(required = false) String city,
-                                                            @RequestParam(required = false) String street,
-                                                            @RequestParam(required = false) String zipcode,
-                                                            @RequestParam(required = false) LocalDateTime fromDate,
-                                                            @RequestParam(required = false) LocalDateTime toDate,
-                                                            @RequestParam(required = false) String paymentType,
-                                                            @RequestParam(required = false) String orderStatus,
-                                                            @RequestParam(required = false) String paymentStatus,
-                                                            Authentication authentication
-                                                                ) {
-        if (authentication == null) {
-            log.info("Authentication is null @ searchOrders");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    public ResponseEntity<List<OrderResponse>> searchOrders(
+            @RequestParam(required = false) String customerName,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String street,
+            @RequestParam(required = false) String zipcode,
+            @RequestParam(required = false) LocalDateTime fromDate,
+            @RequestParam(required = false) LocalDateTime toDate,
+            @RequestParam(required = false) String paymentType,
+            @RequestParam(required = false) String orderStatus,
+            @RequestParam(required = false) String paymentStatus) {
+        // Non-admin users will only see their own orders; service layer should enforce filtering based on caller's customer
+        List<OrderResponse> results = orderService.searchOrders(
+                        customerName, city, street, zipcode,
+                        fromDate, toDate, paymentType, orderStatus, paymentStatus)
+                .stream()
+                .map(OrderResponse::mapToDto)
+                .toList();
 
-        User user = (User) authentication.getPrincipal();
-
-        // Only admin can delete orders
-        if (!userService.hasAdminAccess(user) && customerName != null && !Objects.equals(customerName, user.getCustomer().getName()) ) {
-            log.info("Customer {} ({}) cant search orders for {} @ searchOrders", user.getCustomer().getId(), user.getCustomer().getName(), customerName);
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        } else if (!userService.hasAdminAccess(user) && customerName == null) {
-            customerName = user.getCustomer().getName();
-        }
-
-        return ResponseEntity.ok(
-                orderService.searchOrders(customerName, city, street, zipcode, fromDate, toDate, paymentType, orderStatus, paymentStatus)
-                        .stream().map(OrderResponse::mapToDto).toList()
-        );
+        return ResponseEntity.ok(results);
     }
 }

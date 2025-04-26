@@ -52,4 +52,8 @@ public class UserService {
         Customer customer = user.getCustomer();
         return customer != null && customer.getId().equals(customerId);
     }
+
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username);
+    }
 }
