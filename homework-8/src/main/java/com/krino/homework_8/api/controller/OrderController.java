@@ -112,7 +112,6 @@ public class OrderController {
         }
         User user = (User) authentication.getPrincipal();
 
-        // Only admin can delete orders
         if (!userService.hasAdminAccess(user)) {
             log.info("User is not an admin @ deleteOrder");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -143,7 +142,7 @@ public class OrderController {
 
         // Only admin can delete orders
         if (!userService.hasAdminAccess(user) && customerName != null && !Objects.equals(customerName, user.getCustomer().getName()) ) {
-            log.info("Customer {} cant search orders for {} @ searchOrders", user.getCustomer().getId(), customerName);
+            log.info("Customer {} ({}) cant search orders for {} @ searchOrders", user.getCustomer().getId(), user.getCustomer().getName(), customerName);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         } else if (!userService.hasAdminAccess(user) && customerName == null) {
             customerName = user.getCustomer().getName();

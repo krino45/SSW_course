@@ -158,7 +158,6 @@ public class OrderServiceIntegrationTest {
         orderRepository.save(order3);
     }
 
-    // Existing tests remain unchanged
 
     @Test
     void shouldFindOrdersByCustomerName() {
@@ -235,18 +234,15 @@ public class OrderServiceIntegrationTest {
         assertThat(orders.getFirst().getPayment()).isInstanceOf(Check.class);
     }
 
-    // New tests for createOrder and updateOrder
 
     @Test
     void shouldCreateNewOrder() {
-        // Create order request DTO
         OrderRequest orderRequest = new OrderRequest();
         orderRequest.setCustomerId(customerId1);
         orderRequest.setStatus("NEW");
         orderRequest.setDate(LocalDateTime.now());
 
-        // Add order details
-        List<OrderRequest.OrderDetailDto> details = new ArrayList<>();
+        List<OrderRequest.OrderDetailDto> details = new ArrayList<OrderRequest.OrderDetailDto>();
         OrderRequest.OrderDetailDto detailDto = new OrderRequest.OrderDetailDto();
         detailDto.setItemId(itemId1);
         detailDto.setTaxStatus("TAXABLE");
@@ -260,7 +256,6 @@ public class OrderServiceIntegrationTest {
         details.add(detailDto);
         orderRequest.setOrderDetails(details);
 
-        // Add payment
         OrderRequest.PaymentDto paymentDto = new OrderRequest.PaymentDto();
         paymentDto.setPaymentType("CREDIT");
         paymentDto.setAmount(300.0f);
@@ -270,10 +265,8 @@ public class OrderServiceIntegrationTest {
         paymentDto.setExpiryDate(LocalDateTime.now().plusYears(1));
         orderRequest.setPayment(paymentDto);
 
-        // Create the order
         Order createdOrder = orderService.createOrder(orderRequest);
 
-        // Assertions
         assertNotNull(createdOrder.getId());
         assertEquals("NEW", createdOrder.getStatus());
         assertEquals(customerId1, createdOrder.getCustomer().getId());
@@ -293,12 +286,11 @@ public class OrderServiceIntegrationTest {
 
     @Test
     void shouldUpdateExistingOrder() {
-        // First, create an order to update
         OrderRequest createRequest = new OrderRequest();
         createRequest.setCustomerId(customerId1);
         createRequest.setStatus("NEW");
 
-        List<OrderRequest.OrderDetailDto> details = new ArrayList<>();
+        List<OrderRequest.OrderDetailDto> details = new ArrayList<OrderRequest.OrderDetailDto>();
         OrderRequest.OrderDetailDto detailDto = new OrderRequest.OrderDetailDto();
         detailDto.setItemId(itemId1);
         detailDto.setTaxStatus("TAXABLE");
@@ -322,19 +314,17 @@ public class OrderServiceIntegrationTest {
         Order createdOrder = orderService.createOrder(createRequest);
         Long orderId = createdOrder.getId();
 
-        // Now update the order
         OrderRequest updateRequest = new OrderRequest();
         updateRequest.setStatus("PROCESSING");
-        updateRequest.setCustomerId(customerId2); // Change customer
+        updateRequest.setCustomerId(customerId2);
 
-        // Change order details
         details = new ArrayList<>();
         detailDto = new OrderRequest.OrderDetailDto();
-        detailDto.setItemId(itemId2); // Change item
-        detailDto.setTaxStatus("TAX_EXEMPT"); // Change tax status
+        detailDto.setItemId(itemId2);
+        detailDto.setTaxStatus("TAX_EXEMPT");
 
         quantityDto = new OrderRequest.QuantityDto();
-        quantityDto.setAmount(2); // Change quantity
+        quantityDto.setAmount(2);
         quantityDto.setUnit("kilogram");
         quantityDto.setUnitAbbreviation("kg");
         detailDto.setQuantity(quantityDto);
@@ -342,7 +332,6 @@ public class OrderServiceIntegrationTest {
         details.add(detailDto);
         updateRequest.setOrderDetails(details);
 
-        // Change payment
         paymentDto = new OrderRequest.PaymentDto();
         paymentDto.setPaymentType("CHECK");
         paymentDto.setAmount(150.0f);
@@ -351,11 +340,9 @@ public class OrderServiceIntegrationTest {
         paymentDto.setBankId("BANK456");
         updateRequest.setPayment(paymentDto);
 
-        // Update the order
         Order updatedOrder = orderService.updateOrder(orderId, updateRequest);
 
-        // Assertions
-        assertEquals(orderId, updatedOrder.getId()); // Same ID
+        assertEquals(orderId, updatedOrder.getId());
         assertEquals("PROCESSING", updatedOrder.getStatus());
         assertEquals(customerId2, updatedOrder.getCustomer().getId());
 
